@@ -1,7 +1,20 @@
+const { Op } = require("sequelize");
 const db = require("../database/models");
 // https://ctrly.blog/es/arquitectura-capas/
 // https://www.npmjs.com/package/express-paginate
-const getAllMovies = async (limit, offset) => {
+const getAllMovies = async (limit, offset,keyword) => {
+
+  const options=keyword ?{
+    where:{
+      title:{
+        [Op.substring]:keyword
+      },
+
+    }
+  }: null
+
+
+
   try {
     const movies = await db.Movie.findAll({
       limit,
@@ -21,17 +34,11 @@ const getAllMovies = async (limit, offset) => {
             attributes: []
           }
         }
-      ]
+      ],...options
     });
-    // if (!movie) {
-    //   throw {
-    //     status: 404,
-    //     message: "no hya una pelicula con ese id"
-    //   };
-    // }
 
-    const count = await db.Movie.count();
-    console.log(count);
+
+    const count = await db.Movie.count({...options});
     return {
       movies,
       count
@@ -122,7 +129,7 @@ const updateMovie = async (id, dataMovie) => {
       rating,
       length,
       release_date,
-      genre,
+      genre_id,
       actors
     } = dataMovie;
     const movie = await db.Movie.findByPk(id, {
@@ -156,7 +163,7 @@ const updateMovie = async (id, dataMovie) => {
     movie.rating = rating || movie.rating;
     movie.length = length || movie.length;
     movie.release_date = release_date|| movie.release_date;
-    movie.genre_id = genre || movie.genre_id;
+    movie.genre_id = genre_id || movie.genre_id;
 
   await movie.save();
   if(actors?.length){
@@ -189,7 +196,6 @@ const updateMovie = async (id, dataMovie) => {
 };
 
 const deleteMovie = async id => {
- console.log("Entre aca") 
   try {
     if (isNaN(id)) {
       throw {

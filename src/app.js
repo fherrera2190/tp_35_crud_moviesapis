@@ -2,9 +2,11 @@ const express = require("express");
 const app = express();
 const methodOverride = require("method-override");
 const paginate = require("express-paginate");
+const cors = require("cors");
 //Aquí pueden colocar las rutas de las APIs
 
 //URL encode  - Para que nos pueda llegar la información desde el formulario al req.body
+app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(paginate.middleware(8, 50));

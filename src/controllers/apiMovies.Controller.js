@@ -10,7 +10,11 @@ const paginate = require("express-paginate");
 module.exports = {
   index: async (req, res) => {
     try {
-      const { movies, count } = await getAllMovies(req.query.limit, req.skip);
+      const { movies, count } = await getAllMovies(
+        req.query.limit,
+        req.skip,
+        req.query.keyword
+      );
       const pagesCount = Math.ceil(count / req.query.limit);
       const currentPage = req.query.page;
       const pages = paginate.getArrayPages(req)(
@@ -23,7 +27,9 @@ module.exports = {
         meta: {
           pagesCount,
           currentPage,
-          pages
+          pages,
+          hasNextPages: paginate.hasNextPages(req)(pagesCount),
+          hasPrevPages: res.locals.paginate.hasPreviousPages
         },
         data: movies.map(movie => {
           return {
@@ -60,6 +66,7 @@ module.exports = {
   },
   store: async (req, res) => {
     try {
+      console.log(req.body)
       const {
         title,
         rating,
@@ -78,7 +85,8 @@ module.exports = {
       return res.status(200).json({
         ok: true,
         message: "Pelicula agregada con exito",
-        url: `${req.protocol}://${req.get("host")}/api/v1/movies/${movie.id}`
+        url: `${req.protocol}://${req.get("host")}/api/v1/movies/${movie.id}`,
+        data:movie
       });
     } catch (error) {
       console.log(error);
@@ -90,6 +98,7 @@ module.exports = {
     }
   },
   update: async (req, res) => {
+    console.log(req.body)
     try {
       const movieUpdated = await updateMovie(req.params.id, req.body);
       return res.status(200).json({

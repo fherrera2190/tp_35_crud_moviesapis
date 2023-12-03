@@ -5,7 +5,6 @@ const getAllGenres = async () => {
     const genres = await db.Genre.findAll({
       attributes: ["id", "name", "ranking", "active"]
     });
-    console.log(genres);
     if (!genres) {
       throw {
         status: 404,
